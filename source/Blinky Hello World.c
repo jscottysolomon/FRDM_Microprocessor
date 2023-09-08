@@ -4,8 +4,8 @@
  * @file    Blinky Hello World.c
  * @brief   Application entry point.
  *
- * Traffic light simulator. LEDs blink in order of red, green, and yellow.
- * If a switch is pressed (or held down) only the yellow LED blinks whereas
+ * Traffic light simulator. LEDs blink in order of green, yellow, and red
+ * If the SW1 switch is held down, only the yellow LED blinks whereas
  * the other LEDs stay off.
  *
  * The red and green LEDs are the LEDs that are built into the FRDM board.
@@ -19,25 +19,6 @@
 #include "clock_config.h"
 #include "MKL46Z4.h"
 #include "fsl_debug_console.h"
-
-/*
- * The code below is taken from the video entitle "02 - Generating Events" and is
- * used as a busy delay. I did not write the code for this function.
- */
-int delay_ms(unsigned short delay_t) {
-    SIM->SCGC6 |= (1 << 24); // Clock Enable TPM0
-    SIM->SOPT2 |= (0x2 << 24); // Set TPMSRC to OSCERCLK
-    TPM0->CONF |= (0x1 << 17); // Stop on Overflow
-    TPM0->SC = (0x1 << 7) | (0x07); // Reset Timer Overflow Flag, Set Prescaler 128
-    TPM0->MOD = delay_t * 61 + delay_t/2; //
-
-    TPM0->SC |= 0x01 << 3; // Start the clock!
-
-    while(!(TPM0->SC & 0x80)){} // Wait until Overflow Flag
-    return 1;
-}
-
-//only have to pick one switch just put it in project description
 
 int main(void) {
 
@@ -92,94 +73,97 @@ int main(void) {
     GPIOC->PDDR &= ~(1<<3);	//port C, pin 3
     GPIOC->PDDR &= ~(1<<12);//port C, pin 12
 
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
-    volatile static int x = 0 ;
-    volatile static int test = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
-
-//    GPIOD->PTOR &= ~(1<<5);
-//	GPIOE->PTOR &= ~(1<<29);
-
-    while(1) {
-        i++;
-
-        if(!(GPIOC->PDIR & 0x8) || x == 1) {
-        	GPIOD->PDOR |= (1<<5);
-        	GPIOE->PDOR |= (1<<29);
-        	x = 1;
-        }
-//        else {
-//        	x = 0;
-//        }
-
-		if (x == 1) {
-			GPIOA->PDOR |= (1<<12);
-			test += delay_ms(1000);
-//			GPIOA->PDOR &= ~(1<<12);
-		}
-//		else if (i % 100000 == 0) {
-		else {
-
-        	GPIOD->PDOR |= (1<<5);
-        	test += delay_ms(1000);
-        	GPIOD->PDOR &= ~(1<<5);
-//        	test += delay_ms(10);
-
-        	GPIOA->PDOR |= (1<<12);
-			test += delay_ms(1000);
-			GPIOA->PDOR &= ~(1<<12);
-//			delay_ms(1000);
-
-            GPIOE->PDOR |= (1<<29);
-            test += delay_ms(1000);
-            GPIOE->PDOR &= ~(1<<29);
-
-
-        }
-    }
+    //idk why this works
+    GPIOD->PDOR &= ~(1<<5);
+    GPIOD->PDOR |= (1<<5);
+    GPIOD->PDOR |= (1<<5);
+    GPIOE->PDOR |= (1<<29);
 
     /*
 	 * Okay so evidently don't need variables just used
 	 * while loops with variables
 	 */
 	static int count = 0;
-	static int switch_has_been_pressed = 0; switch_is_on = 0; switch_is_off = 0;
+	static int switch_has_been_pressed = 0;
+	static int green = 0, yellow = 0, red = 0;
+	static int yellow_cycle = 0;
 
 	while(1) {
 		//checking switch state
 		if(!(GPIOC->PDIR & 0x8)) {
-			switch_has_been_pressed = 1;
-			count = 0;
+			if(!yellow_cycle&& !switch_has_been_pressed) {
+				switch_has_been_pressed = 1;
+				count = 0;
+
+				if(yellow) {
+					GPIOA->PDOR &= ~(1<<12);
+					yellow = 0;
+				}
+			}
 
 			//turn off red and green
+			if(red) {
+				GPIOE->PDOR |= (1<<29);
+				red = 0;
+			}
+			if(green) {
+				GPIOD->PDOR |= (1<<5);
+				green = 0;
+			}
+
+		} else {
+			switch_has_been_pressed = 0;
+			if(yellow_cycle) {
+				yellow_cycle = 0;
+				count = 0;
+			}
 		}
 
 		if(switch_has_been_pressed) {
-			if(switch_is_on) {
-				//turn on yellow
-				if(!count) {
-					//turn yellow on
-				} else if(count == 40) {
-					//turn off yellow
-				} else if(count == 80) {
-					//reset count
-					count = 0;
-				}
-			} else if(switch_is_off) {
-				//turn off yellow;
+			//yellow cycle
+			yellow_cycle = 1;
+
+			if(count == 0) {
+				//turn yellow on
+				GPIOA->PDOR |= (1<<12);
+				yellow = 1;
+			} else if(count == 900000) {
+				//turn off yellow
+				GPIOA->PDOR &= ~(1<<12);
+				yellow = 0;
+			} else if(count == 1800000) {
+				//reset count
+				count = -1;
 			}
 
 		}
-		else if(count == 40) {
+		else if(count == 0) {
+			//check if yellow is on (from yellow cycle) and if so turn it off
+			if(yellow) {
+				GPIOA->PDOR &= ~(1<<12);
+				yellow = 0;
+			}
+
 			//turn on green
-		} else if(count== 80) {
+			GPIOD->PDOR &= ~(1<<5);
+			green = 1;
+		} else if(count == 900000) {
 			//turn on yellow, turn off green
-		} else if(count == 120) {
-			//turn on red, turn of yellow
-		} else if(count == 160) {
-			//turn off red
-			count = 0;
+			GPIOD->PDOR |= (1<<5);
+			GPIOA->PDOR |= (1<<12);
+			green = 0;
+			yellow = 1;
+		} else if(count == 1800000) {
+			//turn on red, turn off yellow
+			GPIOA->PDOR &= ~(1<<12);
+			GPIOE->PDOR &= ~(1<<29);
+			yellow = 0;
+			red = 1;
+		} else if(count == 2700000) {
+			//turn off red, reset count
+			GPIOE->PDOR |= (1<<29);
+			red = 0;
+			count = -1;
 		}
 
 		count++;
