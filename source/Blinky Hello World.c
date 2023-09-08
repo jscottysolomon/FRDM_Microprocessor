@@ -37,6 +37,8 @@ int delay_ms(unsigned short delay_t) {
     return 1;
 }
 
+//only have to pick one switch just put it in project description
+
 int main(void) {
 
     /* Init board hardware. */
@@ -132,7 +134,54 @@ int main(void) {
             GPIOE->PDOR |= (1<<29);
             test += delay_ms(1000);
             GPIOE->PDOR &= ~(1<<29);
+
+
         }
     }
+
+    /*
+	 * Okay so evidently don't need variables just used
+	 * while loops with variables
+	 */
+	static int count = 0;
+	static int switch_has_been_pressed = 0; switch_is_on = 0; switch_is_off = 0;
+
+	while(1) {
+		//checking switch state
+		if(!(GPIOC->PDIR & 0x8)) {
+			switch_has_been_pressed = 1;
+			count = 0;
+
+			//turn off red and green
+		}
+
+		if(switch_has_been_pressed) {
+			if(switch_is_on) {
+				//turn on yellow
+				if(!count) {
+					//turn yellow on
+				} else if(count == 40) {
+					//turn off led
+				} else if(count == 80) {
+					//reset count
+					count = 0;
+				}
+			} else if(switch_is_off) {
+				//turn off yellow;
+			}
+
+		}
+		else if(count <= 40) {
+			//turn on green
+		} else if(count <= 80) {
+			//turn on yellow
+		} else if(count <= 120) {
+			//turn on red
+		} else {
+			count = 0;
+		}
+
+		count++;
+	}
     return 0 ;
 }
