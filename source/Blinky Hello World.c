@@ -161,7 +161,7 @@ int main(void) {
 				if(!count) {
 					//turn yellow on
 				} else if(count == 40) {
-					//turn off led
+					//turn off yellow
 				} else if(count == 80) {
 					//reset count
 					count = 0;
@@ -171,13 +171,14 @@ int main(void) {
 			}
 
 		}
-		else if(count <= 40) {
+		else if(count == 40) {
 			//turn on green
-		} else if(count <= 80) {
-			//turn on yellow
-		} else if(count <= 120) {
-			//turn on red
-		} else {
+		} else if(count== 80) {
+			//turn on yellow, turn off green
+		} else if(count == 120) {
+			//turn on red, turn of yellow
+		} else if(count == 160) {
+			//turn off red
 			count = 0;
 		}
 
