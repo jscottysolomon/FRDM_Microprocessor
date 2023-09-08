@@ -1,5 +1,5 @@
 # Build directories
-Debug/*
+**/Debug/*
 
 #IDE files
 .mcuxpressoide_packages_support/
