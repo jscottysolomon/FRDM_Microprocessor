@@ -1,0 +1,2 @@
+.cproject
+board/* except board.c/h
