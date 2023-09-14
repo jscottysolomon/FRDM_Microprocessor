@@ -86,7 +86,7 @@ int main(void) {
 	#endif
 
 	//Enabling Ports
-    SIM->SCGC5 |= 1<<12;	//Port D for LED1
+    	SIM->SCGC5 |= 1<<12;	//Port D for LED1
 	SIM->SCGC5 |= 1<<13; 	//Port E for LED2
 	SIM->SCGC5 |= 1<<11; 	//Port C for SW1
 
