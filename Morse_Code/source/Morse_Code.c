@@ -2,7 +2,8 @@
  * @author J. Scotty Solomon
  * @date 14-September-23
  *
- *
+ * Converts a string into morse code and displays the message
+ * on LED1 and LED2.
  */
 #include <stdio.h>
 #include <string.h>
@@ -75,18 +76,18 @@ void handleMorse(const char* morse, int len);
  */
 int main(void) {
 
-    /* Init board hardware. */
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
+	/* Init board hardware. */
+	BOARD_InitBootPins();
+	BOARD_InitBootClocks();
+	BOARD_InitBootPeripherals();
 
-    /* Init FSL debug console. */
+	/* Init FSL debug console. */
 	#ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
 		BOARD_InitDebugConsole();
 	#endif
 
 	//Enabling Ports
-    SIM->SCGC5 |= 1<<12;	//Port D for LED1
+	SIM->SCGC5 |= 1<<12;	//Port D for LED1
 	SIM->SCGC5 |= 1<<13; 	//Port E for LED2
 	SIM->SCGC5 |= 1<<11; 	//Port C for SW1
 
@@ -106,10 +107,9 @@ int main(void) {
 	GPIOC->PDDR &= ~(1<<3);	//port C, pin 3
 
 	int i = 0;
+	char * str = "CSE 325";
 
     while(1) {
-    	char * str = "CSE 325";
-
     	if(i == 0) {
     		red = green = 0;
     		displayMorse(str,strlen(str));
