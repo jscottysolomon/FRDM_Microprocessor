@@ -1,12 +1,9 @@
 /*
  *@author: J. Scotty Solomon
  *@version 28-Sep-23
+ *
  */
 
-/**
- * @file    motors.c
- * @brief   Application entry point.
- */
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -30,11 +27,18 @@
  * VCC:  A15
  * STBY: A17
  *
+ * SW1: C3
+ *
  */
 
 /*
  * @brief   Application entry point.
  */
+
+void straightS();
+
+volatile int inProcess = 0;
+
 int main(void) {
 
     /* Init board hardware. */
@@ -42,11 +46,16 @@ int main(void) {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
+	#ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
+		BOARD_InitDebugConsole();
+	#endif
+
     //Enabling Ports
     SIM->SCGC5 |= 1<<9; 	//Port A
     SIM->SCGC5 |= 1<<10;	//Port B
     SIM->SCGC5 |= 1<<11; 	//Port C
 
+    //Enabling Pins
     //A15
 	PORTA->PCR[15] &= ~0x700;
 	PORTA->PCR[15] |= 0x700 & (1 << 8);
@@ -79,6 +88,11 @@ int main(void) {
 	PORTC->PCR[2] &= ~0x700;
 	PORTC->PCR[2] |= 0x700 & (1 << 8);
 
+	//C3
+	PORTC->PCR[3] &= ~0x703;
+	PORTC->PCR[3] |= 0x703 & ((1 << 8) | 0x3); //enable pull ups
+
+
 	//Setting up pins for GPIO output
 	GPIOA->PDDR |= (1<<15);	//A15
 	GPIOA->PDDR |= (1<<12);	//A12
@@ -89,8 +103,22 @@ int main(void) {
 	GPIOC->PDDR |= (1<<2);	//C2
 	GPIOC->PDDR |= (1<<3);	//C3
 
+	//Setting input
+	GPIOC->PDDR &= ~(1<<3);	//C3
+
 
 	//Turning on things
+
+    while(1) {
+    	if(!(GPIOC->PDIR & 0x8)) {
+    		straightS();
+    	}
+    }
+
+    return 0;
+}
+
+void straightS() {
 	GPIOA->PDOR |= (1<<15); //A15
 	GPIOA->PDOR |= (1<<12); //A12
 
@@ -99,21 +127,4 @@ int main(void) {
 
 	GPIOC->PDOR |= (1<<1); //C1
 	GPIOC->PDOR |= (1<<2); //C2
-
-	#ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
-		BOARD_InitDebugConsole();
-	#endif
-
-    PRINTF("Hello World\n");
-
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
-    while(1) {
-        i++ ;
-        /* 'Dummy' NOP to allow source level single stepping of
-            tight while() loop */
-        __asm volatile ("nop");
-    }
-    return 0 ;
 }
