@@ -1,0 +1,47 @@
+main() {
+	check for sw1() {
+		//straight
+		motor1_start() //left
+		motor2_start() //right
+		delay(500)
+		motor1_stop()
+		motor2_stop()
+
+		//turn left
+		motor2_start()
+		delay(t1)
+		motor2_stop()
+
+		//straight
+		motor1_start() //left
+		motor2_start() //right
+		delay(500)
+		motor1_stop()
+		motor2_stop()
+
+		//turn left
+		motor2_start()
+		delay(t1)
+		motor2_stop()
+
+		//straight
+		motor1_start() //left
+		motor2_start() //right
+		delay(500)
+		motor1_stop()
+		motor2_stop()
+
+		//turn right
+		motor1_start()
+		delay(t1)
+		motor1_stop()
+
+		//et cetera
+	}
+
+	check for sw2() {
+		//to speed up a motor, you change the output voltage to the motors,
+		//pwma and pmwb
+
+	}
+}
