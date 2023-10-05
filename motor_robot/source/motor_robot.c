@@ -62,19 +62,10 @@ int main(void) {
 	#endif
 
     //Enabling Ports
-    SIM->SCGC5 |= 1<<9; 	//Port A
     SIM->SCGC5 |= 1<<10;	//Port B
     SIM->SCGC5 |= 1<<11; 	//Port C
 
     //Enabling Pins
-    //A15
-	PORTA->PCR[15] &= ~0x700;
-	PORTA->PCR[15] |= 0x700 & (1 << 8);
-
-	//A12
-	PORTA->PCR[12] &= ~0x700;
-	PORTA->PCR[12] |= 0x700 & (1 << 8);
-
 	//B0
 	PORTB->PCR[0] &= ~0x700;
 	PORTB->PCR[0] |= 0x700 & (1 << 8);
@@ -104,24 +95,18 @@ int main(void) {
 	PORTC->PCR[3] |= 0x703 & ((1 << 8) | 0x3); //enable pull ups
 
 	//Setting up pins for GPIO output
-	GPIOA->PDDR |= (1<<15);	//A15
-	GPIOA->PDDR |= (1<<12);	//A12
 	GPIOB->PDDR |= (1<<0);	//B0
 	GPIOB->PDDR |= (1<<1);	//B1
 	GPIOB->PDDR |= (1<<2);	//B2
 	GPIOB->PDDR |= (1<<3);	//B3
 	GPIOC->PDDR |= (1<<1);	//C1
 	GPIOC->PDDR |= (1<<2);	//C2
-	 GPIOC->PDDR |= (1<<3);	//C3
 
-	//Setting input
-//	GPIOC->PDDR &= ~(1<<3);	//C3
-
-	//Setting input
-//	GPIOC->PDDR &= ~(1<<3);	//C3
+	//Setting input switches
+	GPIOC->PDDR &= ~(1<<3);	//C3
 
 
-	//Turning on thing
+	//main loop
 	int i = 0;
 
     while(1) {
@@ -134,31 +119,9 @@ int main(void) {
     return 0;
 }
 
-// void straightS() {
-// 	GPIOA->PDOR |= (1<<15); //A15
-// 	GPIOA->PDOR |= (1<<12); //A12
-
-// 	// GPIOB->PDOR |= (1<<1); //B1
-// 	// GPIOB->PDOR |= (1<<2); //B2
-
-// 	GPIOC->PDOR |= (1<<1); //C1
-// 	GPIOC->PDOR |= (1<<2); //C2
-// 	// GPIOC->PDOR |= (1<<1); //C1
-// 	// GPIOC->PDOR |= (1<<2); //C2
-//     while(1) {
-// 		if(!(GPIOC->PDIR & 0x8)) {
-// 			figure1();
-// 		}
-
-//     }
-//     return 0 ;
-// }
-
 /** Straight S*/
 void figure1() {
 	delay_ms(INIT_DELAY);
-	//Turning on STBY
-	GPIOA->PDOR |= (1<<12); //A12
 
 	//Straight
 	straight();
@@ -213,9 +176,6 @@ void figure1() {
 	delay_ms(STRAIGHT_TIME);
 	stop();
 	delay_ms(STOP_TIME);
-
-	//Turning off STBY
-	GPIOA->PDOR &= ~(1<<12); //A12
 }
 
 void stop() {
