@@ -2,6 +2,9 @@
  *@author: J. Scotty Solomon
  *@version 28-Sep-23
  *
+ * This project showcases motor driving via a microprocessor. The car can go in two fixed
+ * paths, a straight S or a curved S.
+ *
  */
 
 #include <stdio.h>
@@ -15,14 +18,17 @@
 #define STRAIGHT_TIME 1000
 #define STOP_TIME 100
 #define TURN_TIME 600
-#define INIT_DELAY 100
+#define INIT_DELAY 200
 
 void delay_ms(unsigned short delay_t);
 void straight();
 void stop();
 void figure1();
+void figure2();
 void turn_left();
 void turn_right();
+void curve_right();
+void curve_left();
 
 /*
  * Pin Mappings:
@@ -94,6 +100,11 @@ int main(void) {
 	PORTC->PCR[3] &= ~0x703;
 	PORTC->PCR[3] |= 0x703 & ((1 << 8) | 0x3); //enable pull ups
 
+	//C12
+	PORTC->PCR[12] &= ~0x703;
+	PORTC->PCR[12] |= 0x703 & ((1 << 8) | 0x3); //enable pull ups
+
+
 	//Setting up pins for GPIO output
 	GPIOB->PDDR |= (1<<0);	//B0
 	GPIOB->PDDR |= (1<<1);	//B1
@@ -104,6 +115,7 @@ int main(void) {
 
 	//Setting input switches
 	GPIOC->PDDR &= ~(1<<3);	//C3
+	GPIOC->PDDR &= ~(1<<12);	//C12
 
 
 	//main loop
@@ -113,8 +125,15 @@ int main(void) {
     	if(!(GPIOC->PDIR & 0x8)) {
     		figure1();
     	}
+
+    	if(!(GPIOC->PDIR & (1 <<12))) {
+			figure2();
+		}
     	i++;
+
     }
+
+
 
     return 0;
 }
@@ -143,7 +162,7 @@ void figure1() {
 
 	//Left Turn
 	turn_left();
-	delay_ms(TURN_TIME);
+	delay_ms(TURN_TIME*1.07);
 	stop();
 	delay_ms(STOP_TIME);
 
@@ -155,7 +174,7 @@ void figure1() {
 
 	//Right Turn
 	turn_right();
-	delay_ms(TURN_TIME);
+	delay_ms(TURN_TIME*1.2);
 	stop();
 	delay_ms(STOP_TIME);
 
@@ -167,7 +186,7 @@ void figure1() {
 
 	//Right Turn
 	turn_right();
-	delay_ms(TURN_TIME);
+	delay_ms(TURN_TIME*1.34);
 	stop();
 	delay_ms(STOP_TIME);
 
@@ -176,6 +195,49 @@ void figure1() {
 	delay_ms(STRAIGHT_TIME);
 	stop();
 	delay_ms(STOP_TIME);
+}
+
+/*Curved S*/
+void figure2() {
+	delay_ms(INIT_DELAY);
+	int x = 0;
+
+	while(x < 27) {
+		curve_left();
+
+		delay_ms(25);
+		stop();
+		x++;
+	}
+
+	x = 0;
+
+	while(x < 30) {
+		curve_right();
+		delay_ms(25);
+		stop();
+		x++;
+	}
+}
+
+void curve_left() {
+	GPIOC->PDOR |= (1<<1); //C1
+	GPIOB->PDOR |= (1<<3); //B3
+
+	delay_ms(50);
+
+	GPIOB->PDOR |= (1<<2); //B2
+	GPIOB->PDOR |= (1<<1); //B1
+}
+
+void curve_right() {
+	//A
+	GPIOB->PDOR |= (1<<2); //B2
+	GPIOB->PDOR |= (1<<1); //B1
+	delay_ms(75);
+	//B
+	GPIOC->PDOR |= (1<<1); //C1
+	GPIOB->PDOR |= (1<<3); //B3
 }
 
 void stop() {
