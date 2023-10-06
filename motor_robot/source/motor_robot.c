@@ -3,7 +3,18 @@
  *@version 28-Sep-23
  *
  * This project showcases motor driving via a microprocessor. The car can go in two fixed
- * paths, a straight S or a curved S.
+ * paths, a straight S or a curved S. Below is the pin map for the FRDM board and the motor driver:
+ *
+ * Driver | FRDM Board
+ * PWMA: B2
+ * AI1:  B1
+ * AI1:  B0
+ *
+ * PWMB: B3
+ * BI1:  C1
+ * PI2:  C2
+ *
+ * VCC and STBY: P3V3
  *
  */
 
@@ -31,33 +42,13 @@ void curve_right();
 void curve_left();
 
 /*
- * Pin Mappings:
+ * Main entry point, which enables the the neccessary GPIO pins and switches.
  *
- * PWMA: B2
- * AI1:  B1
- * AI1:  B0
- *
- * PWMB: B3
- * BI1:  C1
- * PI2:  C2
- *
- * VCC:  A15
- * STBY: A17
- *
- * SW1: C3
- *
+ * Afterward, the system enters a busy loop until either switch is pressed. Switch
+ * 1 causes the car to move in the path of a straight S. Switch 2 causes the car to
+ * move in the path of a curved S.
  */
-
-/*
- * @brief   Application entry point.
- */
-
-void straightS();
-
-volatile int inProcess = 0;
-
 int main(void) {
-
     /* Init board hardware. */
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -115,26 +106,23 @@ int main(void) {
 
 	//Setting input switches
 	GPIOC->PDDR &= ~(1<<3);	//C3
-	GPIOC->PDDR &= ~(1<<12);	//C12
+	GPIOC->PDDR &= ~(1<<12);//C12
 
-
-	//main loop
 	int i = 0;
 
     while(1) {
+    	//SW1
     	if(!(GPIOC->PDIR & 0x8)) {
     		figure1();
     	}
 
+    	//Sw2
     	if(!(GPIOC->PDIR & (1 <<12))) {
 			figure2();
 		}
     	i++;
 
     }
-
-
-
     return 0;
 }
 
@@ -220,6 +208,10 @@ void figure2() {
 	}
 }
 
+/**
+ * Curves to the left by letting the left wheel spin
+ * more frequently than the right wheel
+ */
 void curve_left() {
 	GPIOC->PDOR |= (1<<1); //C1
 	GPIOB->PDOR |= (1<<3); //B3
@@ -230,6 +222,10 @@ void curve_left() {
 	GPIOB->PDOR |= (1<<1); //B1
 }
 
+/**
+ * Curves to the right by letting the right wheel spin
+ * more frequently than the left wheel
+ */
 void curve_right() {
 	//A
 	GPIOB->PDOR |= (1<<2); //B2
@@ -240,6 +236,9 @@ void curve_right() {
 	GPIOB->PDOR |= (1<<3); //B3
 }
 
+/**
+ * Signals to motor driver to stop all wheels
+ */
 void stop() {
 	//A
 	GPIOB->PDOR &= ~(1<<2); //B2
@@ -250,6 +249,10 @@ void stop() {
 	GPIOB->PDOR &= ~(1<<3); //B3
 }
 
+/**
+ * Sets left and right wheels to go straight at
+ * an even pace
+ */
 void straight() {
 	//A
 	GPIOB->PDOR |= (1<<2); //B2
@@ -260,17 +263,31 @@ void straight() {
 	GPIOB->PDOR |= (1<<3); //B3
 }
 
+/**
+ * Turns on the right wheel so the car
+ * does an even turn of 90 degrees
+ */
 void turn_left() {
 	GPIOB->PDOR |= (1<<3); //B3
 	GPIOC->PDOR |= (1<<1); //C1
 }
 
+/**
+ * Turns on the left wheel so the car
+ * does an even turn of 90 degrees
+ */
 void turn_right() {
 
 	GPIOB->PDOR |= (1<<2); //B2
 	GPIOB->PDOR |= (1<<1); //B1
 }
 
+/**
+ * This code is from the lecture slides. It creates a busy timer
+ * that will not return until delay_t has passed
+ *
+ * @delay_t: delay time in milliseconds
+ */
 void delay_ms(unsigned short delay_t) {
     SIM->SCGC6 |= (1 << 24); // Clock Enable TPM0
     SIM->SOPT2 |= (0x2 << 24); // Set TPMSRC to OSCERCLK
