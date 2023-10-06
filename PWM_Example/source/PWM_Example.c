@@ -99,6 +99,8 @@ int main(void) {
 
         TPM2->CONTROLS[0].CnSC |= (0x2 << 2) | (0x2 << 4);  // Edge PWM
 		TPM2->MOD = 7999;  //
+		TPM2->SC &= 0; //clearing, disabling CPWMS
+//		TPM2->CnSC |= (1<<5);
 		TPM2->SC |= 0x01 << 3; // Start the clock!
 
         TPM2->CONTROLS[1].CnSC |= (0x2 << 2) | (0x2 << 4);  // Edge PWM
@@ -109,13 +111,13 @@ int main(void) {
         int i = 0;
         while(1) {
             i++;
-            if(i > 7999)
-             i=0;
-            // Set new PWM value
+//            if(i > 7999)
+//             i=0;
+//            // Set new PWM value
             TPM0->CONTROLS[5].CnV = i;
             TPM2->CONTROLS[1].CnV = i;
             TPM2->CONTROLS[0].CnV = i;
-            delay_ms(5000);
+//            delay_ms(5000);
            }
           /* Never leave main */
         return 0;
