@@ -60,7 +60,7 @@ Both algorithms rely on self-contained functions, so the algorithms overall are 
 
 ### Results
 
-Overall, the project behaves as expected. A video depicting the car moving along both paths can be found [here]([https://youtu.be/j1Yx_2fLncw?si=mf8ocq7hosrxdl_a). Figure 3 features the finalized build of the car, including all three frames while Figure 4 features an aerial view of the car, showcasing the wiring used.
+Overall, the project behaves as expected. A video depicting the car moving along both paths can be found [here](https://youtu.be/j1Yx_2fLncw?si=mf8ocq7hosrxdl_a) . Figure 3 features the finalized build of the car, including all three frames while Figure 4 features an aerial view of the car, showcasing the wiring used.
 
 **Figure 3**
 
