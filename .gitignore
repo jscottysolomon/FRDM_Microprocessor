@@ -8,3 +8,4 @@ AzureRTOS_TAD_logs/
 FreeRTOS_TAD_logs/
 ZephyrRTOS_TAD_logs/
 MKL46Z4_Project/
+sensor/*

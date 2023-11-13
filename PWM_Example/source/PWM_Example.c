@@ -103,7 +103,7 @@ int main(void) {
 //		TPM2->CnSC |= (1<<5);
 		TPM2->SC |= 0x01 << 3; // Start the clock!
 
-        TPM2->CONTROLS[1].CnSC |= (0x2 << 2) | (0x2 << 4);  // Edge PWM
+        TPM2->CONTROLS[1].CnSC |= (0x1 << 2) | (0x2 << 4);  // Edge PWM
 		TPM2->MOD = 7999;  //
 		TPM2->SC |= 0x01 << 3; // Start the clock!
 
